@@ -1,9 +1,9 @@
 var tape = require('tape')
-var rats = require('.')
+var serialize = require('../serialize')
 var Int64 = require('node-int64')
 
 tape('header', function (t) {
-  var buf = rats.encodeHeader({
+  var buf = serialize.encodeHeader({
     version: 0,
     metricType: 0,
     baseTs: new Int64((1234).toString(16)),
@@ -11,7 +11,7 @@ tape('header', function (t) {
     baseTsDelta: 3,
     baseValueDelta: 2
   })
-  var header = rats.decodeHeader(buf)
+  var header = serialize.decodeHeader(buf)
   t.same(header, {
     version: 0,
     metricType: 0,
@@ -26,7 +26,7 @@ tape('header', function (t) {
 tape('invalid header', function (t) {
   var buf = new Buffer('Hello')
 
-  t.throws(function () { rats.decodeHeader(buf) })
+  t.throws(function () { serialize.decodeHeader(buf) })
   t.end()
 })
 
@@ -41,10 +41,10 @@ tape('record, metricType = 0', function (t) {
     baseValueDelta: 2
   }
 
-  var buf = rats.encodeTs(header, 2, now + 2, 4)
-  var raw = rats.decodeTs(header, 2, buf, true)
+  var buf = serialize.encodeTs(header, 2, now + 2, 4)
+  var raw = serialize.decodeTs(header, 2, buf, true)
   t.same(raw, {timestamp: 0, value: 0})
-  var rec = rats.decodeTs(header, 2, buf)
+  var rec = serialize.decodeTs(header, 2, buf)
   t.same(rec, {timestamp: now + 2, value: 4})
   t.end()
 })
@@ -60,10 +60,10 @@ tape('record, metricType = 1', function (t) {
     baseValueDelta: 2
   }
 
-  var buf = rats.encodeTs(header, 2, now + 2, 4)
-  var raw = rats.decodeTs(header, 2, buf, true)
+  var buf = serialize.encodeTs(header, 2, now + 2, 4)
+  var raw = serialize.decodeTs(header, 2, buf, true)
   t.same(raw, {timestamp: 0, value: -6})
-  var rec = rats.decodeTs(header, 2, buf)
+  var rec = serialize.decodeTs(header, 2, buf)
   t.same(rec, {timestamp: now + 2, value: 4})
   t.end()
 })
