@@ -7,12 +7,14 @@ var messages = protobuf(fs.readFileSync('./messages.proto'))
 module.exports = {encodeHeader, decodeHeader, encodeTs, decodeTs}
 
 function encodeHeader (header) {
-  return messages.Header.encode(header)
+  var int64 = new Int64(header.baseTs.toString(16))
+  var headerForEncode = Object.assign({}, header, {baseTs: int64})
+  return messages.Header.encode(headerForEncode)
 }
 
 function decodeHeader (buf) {
   var header = messages.Header.decode(buf)
-  header.baseTs = new Int64(header.baseTs)
+  header.baseTs = new Int64(header.baseTs).toNumber()
   return header
 }
 

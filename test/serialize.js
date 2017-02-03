@@ -1,12 +1,11 @@
 var tape = require('tape')
 var serialize = require('../serialize')
-var Int64 = require('node-int64')
 
 tape('header', function (t) {
   var buf = serialize.encodeHeader({
     version: 0,
     metricType: 0,
-    baseTs: new Int64((1234).toString(16)),
+    baseTs: 1234,
     baseValue: 1,
     baseTsDelta: 3,
     baseValueDelta: 2
@@ -15,7 +14,7 @@ tape('header', function (t) {
   t.same(header, {
     version: 0,
     metricType: 0,
-    baseTs: new Int64((1234).toString(16)),
+    baseTs: 1234,
     baseValue: 1,
     baseTsDelta: 3,
     baseValueDelta: 2
@@ -35,7 +34,7 @@ tape('record, metricType = 0', function (t) {
   var header = {
     version: 0,
     metricType: 0,
-    baseTs: new Int64((now).toString(16)),
+    baseTs: now,
     baseValue: 10,
     baseTsDelta: 1,
     baseValueDelta: 2
@@ -54,7 +53,7 @@ tape('record, metricType = 1', function (t) {
   var header = {
     version: 0,
     metricType: 1,
-    baseTs: new Int64((now).toString(16)),
+    baseTs: now,
     baseValue: 10,
     baseTsDelta: 1,
     baseValueDelta: 2
