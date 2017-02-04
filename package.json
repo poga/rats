@@ -1,5 +1,5 @@
 {
-  "name": "rats.js",
+  "name": "rats-js",
   "version": "0.0.1",
   "description": "marshal and unmarshalling rats timeseries",
   "main": "index.js",
