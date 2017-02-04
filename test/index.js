@@ -9,6 +9,8 @@ tape('encode', function (t) {
   pump(streamify([[0, 1], [1, 2], [2, 3]]), encoder(0), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
+    t.same(fs.statSync('test_encode.rats').size, 56)
+
     var buf = fs.readFileSync('test_encode.rats')
 
     var header = serialize.decodeHeader(buf.slice(0, 42))
