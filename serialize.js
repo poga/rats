@@ -43,7 +43,7 @@ function decodeRecord (header, idx, buf, raw) {
 
   var record = messages.Record.decode(buf)
 
-  if (raw) return {timestamp: record.tsDoubleDelta, value: record.valueDelta}
+  if (raw) return [record.tsDoubleDelta, record.valueDelta]
 
   var projectedTs = header.baseTs + idx * header.baseTsDelta
   var realTs = record.tsDoubleDelta + projectedTs
@@ -57,5 +57,5 @@ function decodeRecord (header, idx, buf, raw) {
     throw new Error('Invalid metric type')
   }
 
-  return {timestamp: realTs, value: realV}
+  return [realTs, realV]
 }

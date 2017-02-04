@@ -42,9 +42,9 @@ tape('record, metricType = 0', function (t) {
 
   var buf = serialize.encodeRecord(header, 2, now + 2, 4)
   var raw = serialize.decodeRecord(header, 2, buf, true)
-  t.same(raw, {timestamp: 0, value: 0})
+  t.same(raw, [0, 0])
   var rec = serialize.decodeRecord(header, 2, buf)
-  t.same(rec, {timestamp: now + 2, value: 4})
+  t.same(rec, [now + 2, 4])
   t.end()
 })
 
@@ -61,8 +61,8 @@ tape('record, metricType = 1', function (t) {
 
   var buf = serialize.encodeRecord(header, 2, now + 2, 4)
   var raw = serialize.decodeRecord(header, 2, buf, true)
-  t.same(raw, {timestamp: 0, value: -6})
+  t.same(raw, [0, -6])
   var rec = serialize.decodeRecord(header, 2, buf)
-  t.same(rec, {timestamp: now + 2, value: 4})
+  t.same(rec, [now + 2, 4])
   t.end()
 })
