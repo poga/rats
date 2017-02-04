@@ -4,7 +4,7 @@ var Int64 = require('node-int64')
 
 var messages = protobuf(fs.readFileSync('./messages.proto'))
 
-module.exports = {encodeHeader, decodeHeader, encodeTs, decodeTs}
+module.exports = {encodeHeader, decodeHeader, encodeRecord, decodeRecord}
 
 function encodeHeader (header) {
   var int64 = new Int64(header.baseTs.toString(16))
@@ -18,7 +18,7 @@ function decodeHeader (buf) {
   return header
 }
 
-function encodeTs (header, idx, timestamp, value) {
+function encodeRecord (header, idx, timestamp, value) {
   if (idx < 2) throw new Error('index must > 2')
 
   // calculate timestamp double-delta
@@ -38,7 +38,7 @@ function encodeTs (header, idx, timestamp, value) {
   return messages.Record.encode({tsDoubleDelta: ddTs, valueDelta: dV})
 }
 
-function decodeTs (header, idx, buf, raw) {
+function decodeRecord (header, idx, buf, raw) {
   if (idx < 2) throw new Error('index must > 2')
 
   var record = messages.Record.decode(buf)

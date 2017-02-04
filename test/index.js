@@ -20,7 +20,7 @@ tape('encode', function (t) {
       baseTsDelta: 1,
       baseValueDelta: 1
     })
-    t.same(serialize.decodeTs(header, 2, buf.slice(42, 56)), {timestamp: 2, value: 3})
+    t.same(serialize.decodeRecord(header, 2, buf.slice(42, 56)), {timestamp: 2, value: 3})
 
     fs.unlinkSync('test_encode.rats')
     t.end()

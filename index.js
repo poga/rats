@@ -9,7 +9,6 @@ function fn (name, labels) {
   var fn = [name]
   if (labels) fn.push(labels.keys.sort().map(k => labels[k]).join('.'))
   fn.push('rats')
-  console.log(fn.join('.'))
   return fn.join('.')
 }
 
@@ -32,7 +31,7 @@ function encoder (type) {
     if (idx === 1) {
       this.push(serialize.encodeHeader(header))
     } else if (idx > 1) {
-      this.push(serialize.encodeTs(header, idx, chunk[0], chunk[1]))
+      this.push(serialize.encodeRecord(header, idx, chunk[0], chunk[1]))
     }
 
     idx += 1
