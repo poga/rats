@@ -1,4 +1,4 @@
-var {encoder, fn, count, readHeader, read} = require('..')
+var {counterEncoder, fn, count, readHeader, read} = require('..')
 var tape = require('tape')
 var streamify = require('stream-array')
 var pump = require('pump')
@@ -6,7 +6,7 @@ var fs = require('fs')
 var serialize = require('../serialize')
 
 tape('encode', function (t) {
-  pump(streamify([[0, 1], [1, 2], [2, 3]]), encoder(0), fs.createWriteStream(fn('test_encode')), function (err) {
+  pump(streamify([[0, 1], [1, 2], [2, 3]]), counterEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
     t.same(fs.statSync('test_encode.rats').size, 56) // 42 bytes header + 14 bytes per record
@@ -30,7 +30,7 @@ tape('encode', function (t) {
 })
 
 tape('count', function (t) {
-  pump(streamify([[0, 1], [1, 2], [2, 3]]), encoder(0), fs.createWriteStream(fn('test_encode')), function (err) {
+  pump(streamify([[0, 1], [1, 2], [2, 3]]), counterEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
     t.same(count('test_encode.rats'), 3) // 42 bytes header + 14 bytes per record
@@ -40,7 +40,7 @@ tape('count', function (t) {
 })
 
 tape('readHeader', function (t) {
-  pump(streamify([[0, 1], [1, 2], [2, 3]]), encoder(0), fs.createWriteStream(fn('test_encode')), function (err) {
+  pump(streamify([[0, 1], [1, 2], [2, 3]]), counterEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
     readHeader('test_encode.rats', function (err, header) {
@@ -60,7 +60,7 @@ tape('readHeader', function (t) {
 })
 
 tape('read', function (t) {
-  pump(streamify([[0, 1], [1, 2], [2, 3]]), encoder(0), fs.createWriteStream(fn('test_encode')), function (err) {
+  pump(streamify([[0, 1], [1, 2], [2, 3]]), counterEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
     read('test_encode.rats', 0, function (err, record) {

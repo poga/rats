@@ -4,13 +4,21 @@ const fs = require('fs')
 
 const VERSION = 0
 
-module.exports = {fn, encoder, count, readHeader, read}
+module.exports = {fn, gaugeEncoder, counterEncoder, count, readHeader, read}
 
 function fn (name, labels) {
   var fn = [name]
   if (labels) fn.push(labels.keys.sort().map(k => labels[k]).join('.'))
   fn.push('rats')
   return fn.join('.')
+}
+
+function counterEncoder () {
+  return encoder(0)
+}
+
+function gaugeEncoder () {
+  return encoder(1)
 }
 
 function encoder (type) {
