@@ -52,39 +52,29 @@ function count (fn) {
   return (fs.statSync(fn).size - 42) / 14 + 2
 }
 
-function readHeader (fn, cb) {
-  fs.open(fn, 'r', function (err, f) {
+function readHeader (fd, cb) {
+  var buf = new Buffer(42)
+
+  fs.read(fd, buf, 0, 42, 0, function (err, bytesRead, buf) {
     if (err) return cb(err)
-    var buf = new Buffer(42)
 
-    fs.read(f, buf, 0, 42, 0, function (err, bytesRead, buf) {
-      if (err) return cb(err)
-
-      var header = serialize.decodeHeader(buf)
-
-      fs.close(f, function () {
-        cb(null, header)
-      })
-    })
+    var header = serialize.decodeHeader(buf)
+    cb(null, header)
   })
 }
 
-function read (fn, header, n, cb) {
+function read (fd, header, n, cb) {
   if (n === 0) {
     cb(null, [header.baseTs, header.baseValue])
   } else if (n === 1) {
     cb(null, [header.baseTs + header.baseTsDelta, header.baseValue + header.baseValueDelta])
   } else {
-    fs.open(fn, 'r', function (err, f) {
+    var buf = new Buffer(14)
+    fs.read(fd, buf, 0, 14, (n - 2) * 14 + 42, function (err, bytesRead, buf) {
       if (err) return cb(err)
 
-      var buf = new Buffer(14)
-      fs.read(f, buf, 0, 14, (n - 2) * 14 + 42, function (err, bytesRead, buf) {
-        if (err) return cb(err)
-
-        var record = serialize.decodeRecord(header, n, buf)
-        cb(null, record)
-      })
+      var record = serialize.decodeRecord(header, n, buf)
+      cb(null, record)
     })
   }
 }

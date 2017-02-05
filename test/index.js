@@ -43,18 +43,21 @@ tape('readHeader counter', function (t) {
   pump(streamify([[0, 1], [1, 2], [2, 3]]), counterEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
-    readHeader('test_encode.rats', function (err, header) {
+    fs.open('test_encode.rats', 'r', function (err, fd) {
       t.error(err)
-      t.same(header, {
-        version: 0,
-        metricType: 0,
-        baseTs: 0,
-        baseValue: 1,
-        baseTsDelta: 1,
-        baseValueDelta: 1
+      readHeader(fd, function (err, header) {
+        t.error(err)
+        t.same(header, {
+          version: 0,
+          metricType: 0,
+          baseTs: 0,
+          baseValue: 1,
+          baseTsDelta: 1,
+          baseValueDelta: 1
+        })
+        fs.unlinkSync('test_encode.rats')
+        t.end()
       })
-      fs.unlinkSync('test_encode.rats')
-      t.end()
     })
   })
 })
@@ -63,19 +66,22 @@ tape('read counter', function (t) {
   pump(streamify([[0, 1], [1, 2], [2, 3]]), counterEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
-    readHeader('test_encode.rats', function (err, header) {
+    fs.open('test_encode.rats', 'r', function (err, fd) {
       t.error(err)
-      read('test_encode.rats', header, 0, function (err, record) {
+      readHeader(fd, function (err, header) {
         t.error(err)
-        t.same(record, [0, 1])
-        read('test_encode.rats', header, 1, function (err, record) {
+        read(fd, header, 0, function (err, record) {
           t.error(err)
-          t.same(record, [1, 2])
-          read('test_encode.rats', header, 2, function (err, record) {
+          t.same(record, [0, 1])
+          read(fd, header, 1, function (err, record) {
             t.error(err)
-            t.same(record, [2, 3])
-            fs.unlinkSync('test_encode.rats')
-            t.end()
+            t.same(record, [1, 2])
+            read(fd, header, 2, function (err, record) {
+              t.error(err)
+              t.same(record, [2, 3])
+              fs.unlinkSync('test_encode.rats')
+              t.end()
+            })
           })
         })
       })
@@ -121,18 +127,21 @@ tape('readHeader gauge', function (t) {
   pump(streamify([[0, 1], [1, 2], [2, 3]]), gaugeEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
-    readHeader('test_encode.rats', function (err, header) {
+    fs.open('test_encode.rats', 'r', function (err, fd) {
       t.error(err)
-      t.same(header, {
-        version: 0,
-        metricType: 1,
-        baseTs: 0,
-        baseValue: 1,
-        baseTsDelta: 1,
-        baseValueDelta: 1
+      readHeader(fd, function (err, header) {
+        t.error(err)
+        t.same(header, {
+          version: 0,
+          metricType: 1,
+          baseTs: 0,
+          baseValue: 1,
+          baseTsDelta: 1,
+          baseValueDelta: 1
+        })
+        fs.unlinkSync('test_encode.rats')
+        t.end()
       })
-      fs.unlinkSync('test_encode.rats')
-      t.end()
     })
   })
 })
@@ -141,19 +150,22 @@ tape('read gauge', function (t) {
   pump(streamify([[0, 1], [1, 2], [2, 3]]), gaugeEncoder(), fs.createWriteStream(fn('test_encode')), function (err) {
     t.error(err)
 
-    readHeader('test_encode.rats', function (err, header) {
+    fs.open('test_encode.rats', 'r', function (err, fd) {
       t.error(err)
-      read('test_encode.rats', header, 0, function (err, record) {
+      readHeader(fd, function (err, header) {
         t.error(err)
-        t.same(record, [0, 1])
-        read('test_encode.rats', header, 1, function (err, record) {
+        read(fd, header, 0, function (err, record) {
           t.error(err)
-          t.same(record, [1, 2])
-          read('test_encode.rats', header, 2, function (err, record) {
+          t.same(record, [0, 1])
+          read(fd, header, 1, function (err, record) {
             t.error(err)
-            t.same(record, [2, 3])
-            fs.unlinkSync('test_encode.rats')
-            t.end()
+            t.same(record, [1, 2])
+            read(fd, header, 2, function (err, record) {
+              t.error(err)
+              t.same(record, [2, 3])
+              fs.unlinkSync('test_encode.rats')
+              t.end()
+            })
           })
         })
       })
