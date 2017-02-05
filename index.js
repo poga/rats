@@ -69,26 +69,22 @@ function readHeader (fn, cb) {
   })
 }
 
-function read (fn, n, cb) {
-  readHeader(fn, function (err, header, fd) {
-    if (err) return cb(err)
+function read (fn, header, n, cb) {
+  if (n === 0) {
+    cb(null, [header.baseTs, header.baseValue])
+  } else if (n === 1) {
+    cb(null, [header.baseTs + header.baseTsDelta, header.baseValue + header.baseValueDelta])
+  } else {
+    fs.open(fn, 'r', function (err, f) {
+      if (err) return cb(err)
 
-    if (n === 0) {
-      cb(null, [header.baseTs, header.baseValue])
-    } else if (n === 1) {
-      cb(null, [header.baseTs + header.baseTsDelta, header.baseValue + header.baseValueDelta])
-    } else {
-      fs.open(fn, 'r', function (err, f) {
+      var buf = new Buffer(14)
+      fs.read(f, buf, 0, 14, (n - 2) * 14 + 42, function (err, bytesRead, buf) {
         if (err) return cb(err)
 
-        var buf = new Buffer(14)
-        fs.read(f, buf, 0, 14, (n - 2) * 14 + 42, function (err, bytesRead, buf) {
-          if (err) return cb(err)
-
-          var record = serialize.decodeRecord(header, n, buf)
-          cb(null, record)
-        })
+        var record = serialize.decodeRecord(header, n, buf)
+        cb(null, record)
       })
-    }
-  })
+    })
+  }
 }
