@@ -1,13 +1,5 @@
-message Header {
-  required fixed32 version  = 1;
-  required fixed32 metricType = 2;
-  required fixed64 baseTs = 3;
-  required double baseValue = 4;
-  required fixed32 baseTsDelta = 5;
-  required double baseValueDelta = 6;
-}
-
-message Record {
-  required fixed32 tsDoubleDelta = 1;
-  required double valueDelta = 2;
+message Index {
+  required fixed32 offset = 1;
+  required fixed32 position = 2;
+  required fixed32 size = 3;
 }

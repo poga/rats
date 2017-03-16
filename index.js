@@ -1,80 +1,77 @@
-const serialize = require('./serialize')
-const through2 = require('through2')
 const fs = require('fs')
+const pb = require('protocol-buffers')
+const path = require('path')
 
-const VERSION = 0
+const messages = pb(fs.readFileSync(path.join(__dirname, 'messages.proto')))
 
-module.exports = {fn, gaugeEncoder, counterEncoder, count, readHeader, read}
+const INDEX_ITEM_SIZE = 15
 
-function fn (name, labels) {
-  var fn = [name]
-  if (labels) fn.push(labels.keys.sort().map(k => labels[k]).join('.'))
-  fn.push('rats')
-  return fn.join('.')
-}
+module.exports = RATS
 
-function counterEncoder () {
-  return encoder(0)
-}
+function RATS (path, opts) {
+  opts = opts || {}
+  this.path = path
 
-function gaugeEncoder () {
-  return encoder(1)
-}
+  if (!fs.statSync(this.path).isDirectory()) throw new Error('path must be a directory')
 
-function encoder (type) {
-  var header = {
-    version: VERSION,
-    metricType: type
-  }
-  var idx = 0
-
-  return through2.obj(function (chunk, enc, cb) {
-    if (idx === 0) {
-      header.baseTs = chunk[0]
-      header.baseValue = chunk[1]
-    } else if (idx === 1) {
-      header.baseTsDelta = chunk[0] - header.baseTs
-      header.baseValueDelta = chunk[1] - header.baseValue
-    }
-
-    if (idx === 1) {
-      this.push(serialize.encodeHeader(header))
-    } else if (idx > 1) {
-      this.push(serialize.encodeRecord(header, idx, chunk[0], chunk[1]))
-    }
-
-    idx += 1
-    cb()
-  })
-}
-
-function count (fn) {
-  return (fs.statSync(fn).size - 42) / 14 + 2
-}
-
-function readHeader (fd, cb) {
-  var buf = new Buffer(42)
-
-  fs.read(fd, buf, 0, 42, 0, function (err, bytesRead, buf) {
-    if (err) return cb(err)
-
-    var header = serialize.decodeHeader(buf)
-    cb(null, header)
-  })
-}
-
-function read (fd, header, n, cb) {
-  if (n === 0) {
-    cb(null, [header.baseTs, header.baseValue])
-  } else if (n === 1) {
-    cb(null, [header.baseTs + header.baseTsDelta, header.baseValue + header.baseValueDelta])
+  var maxOffset = 0
+  var files = fs.readdirSync(this.path)
+  if (files.length === 0) {
+    this.currentOffset = 0
+    this.currentSegmentOffset = 0
+    this.currentSegmentSize = 0
   } else {
-    var buf = new Buffer(14)
-    fs.read(fd, buf, 0, 14, (n - 2) * 14 + 42, function (err, bytesRead, buf) {
+    files.forEach(function (file) {
+      if (file.endsWith('.index')) {
+        var offset = file.match(/^(\d+)\.index/)[1]
+        if (offset > maxOffset) maxOffset = offset
+      }
+    })
+    this.currentSegmentOffset = maxOffset
+    this.currentOffset = this.currentSegmentOffset + (fs.statSync(this.currentIndex()).size) / INDEX_ITEM_SIZE
+    this.currentSegmentSize = fs.statSync(this.currentLog).size
+  }
+
+  this.maxSegmentSize = opts.maxSegmentSize || 200 * 1024 * 1024 // max segment size in bytes
+}
+
+RATS.prototype.append = function (obj, time, cb) {
+  if (!cb) {
+    cb = time // time is optional
+    time = Date.now()
+  }
+  var data = new Buffer(JSON.stringify(Object.assign({}, obj, {time: time})))
+  var self = this
+
+  if (this.currentSegmentSize >= this.maxSegmentSize) {
+    this.currentSegmentOffset = this.currentOffset
+  }
+
+  appendLog(data, time)
+
+  function appendLog (data, time) {
+    fs.appendFile(self.currentLog(), data, function (err) {
       if (err) return cb(err)
 
-      var record = serialize.decodeRecord(header, n, buf)
-      cb(null, record)
+      appendIndex()
     })
   }
+
+  function appendIndex () {
+    var index = {offset: self.currentOffset, position: self.currentSegmentSize, size: data.length}
+    fs.appendFile(self.currentIndex(), messages.Index.encode(index), function (err) {
+      if (err) return cb(err)
+      this.currentSegmentSize += data.length
+
+      cb()
+    })
+  }
+}
+
+RATS.prototype.currentIndex = function () {
+  return path.join(this.path, `${this.currentSegmentOffset}.index`)
+}
+
+RATS.prototype.currentLog = function () {
+  return path.join(this.path, `${this.currentSegmentOffset}.log`)
 }
