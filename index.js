@@ -29,7 +29,7 @@ function RATS (path, opts) {
     })
     this.currentSegmentOffset = maxOffset
     this.currentOffset = this.currentSegmentOffset + (fs.statSync(this.currentIndex()).size) / INDEX_ITEM_SIZE
-    this.currentSegmentSize = fs.statSync(this.currentLog).size
+    this.currentSegmentSize = fs.statSync(this.currentLog()).size
   }
 
   this.maxSegmentSize = opts.maxSegmentSize || 200 * 1024 * 1024 // max segment size in bytes
@@ -40,7 +40,7 @@ RATS.prototype.append = function (obj, time, cb) {
     cb = time // time is optional
     time = Date.now()
   }
-  var data = new Buffer(JSON.stringify(Object.assign({}, obj, {time: time})))
+  var data = new Buffer(JSON.stringify(Object.assign({}, obj, {time: time})) + '\n')
   var self = this
 
   if (this.currentSegmentSize >= this.maxSegmentSize) {
