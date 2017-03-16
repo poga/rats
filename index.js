@@ -1,10 +1,14 @@
 const fs = require('fs')
 const pb = require('protocol-buffers')
 const path = require('path')
+const uint64be = require('uint64be')
 
 const messages = pb(fs.readFileSync(path.join(__dirname, 'messages.proto')))
 
+const VERSION = 1
+const HEADER_SIZE = 14
 const INDEX_ITEM_SIZE = 15
+
 const DEFAULT_MAX_SEGMENT_SIZE = 5 * 1024 * 1024 // max segment size in bytes
 
 module.exports = RATS
@@ -30,7 +34,7 @@ function RATS (path, opts) {
       }
     })
     this.currentSegmentOffset = maxOffset
-    this.currentOffset = this.currentSegmentOffset + (fs.statSync(this.currentIndex()).size) / INDEX_ITEM_SIZE
+    this.currentOffset = this.currentSegmentOffset + (fs.statSync(this.currentIndex()).size - HEADER_SIZE) / INDEX_ITEM_SIZE
     this.currentSegmentSize = fs.statSync(this.currentLog()).size
   }
 }
@@ -38,14 +42,19 @@ function RATS (path, opts) {
 RATS.prototype.append = function (obj, time, cb) {
   if (!cb) {
     cb = time // time is optional
-    time = Date.now()
+    time = Math.round(Date.now() / 1000)
   }
   var data = new Buffer(JSON.stringify(Object.assign({}, obj, {time: time})) + '\n')
   var self = this
 
+  if (this.currentOffset === 0) {
+    appendHeader(time)
+  }
+
   if (this.currentSegmentSize >= this.maxSegmentSize) {
     this.currentSegmentOffset = this.currentOffset
     this.currentSegmentSize = 0
+    appendHeader(time)
   }
 
   appendLog(data, time)
@@ -67,6 +76,11 @@ RATS.prototype.append = function (obj, time, cb) {
 
       cb()
     })
+  }
+
+  function appendHeader (baseTimestamp) {
+    var header = {version: VERSION, baseTimestamp: uint64be.encode(baseTimestamp)}
+    fs.appendFileSync(self.currentIndex(), messages.Header.encode(header))
   }
 }
 

@@ -1,3 +1,8 @@
+message Header {
+  required fixed32 version = 1;
+  required fixed64 baseTimestamp = 2;
+}
+
 message Index {
   required fixed32 offset = 1;
   required fixed32 position = 2;
