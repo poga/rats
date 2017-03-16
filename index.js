@@ -5,12 +5,14 @@ const path = require('path')
 const messages = pb(fs.readFileSync(path.join(__dirname, 'messages.proto')))
 
 const INDEX_ITEM_SIZE = 15
+const DEFAULT_MAX_SEGMENT_SIZE = 5 * 1024 // max segment size in bytes
 
 module.exports = RATS
 
 function RATS (path, opts) {
-  opts = opts || {}
+  opts = Object.assign({}, {maxSegmentSize: DEFAULT_MAX_SEGMENT_SIZE}, opts)
   this.path = path
+  this.maxSegmentSize = opts.maxSegmentSize
 
   if (!fs.statSync(this.path).isDirectory()) throw new Error('path must be a directory')
 
@@ -31,8 +33,6 @@ function RATS (path, opts) {
     this.currentOffset = this.currentSegmentOffset + (fs.statSync(this.currentIndex()).size) / INDEX_ITEM_SIZE
     this.currentSegmentSize = fs.statSync(this.currentLog()).size
   }
-
-  this.maxSegmentSize = opts.maxSegmentSize || 200 * 1024 * 1024 // max segment size in bytes
 }
 
 RATS.prototype.append = function (obj, time, cb) {
@@ -45,6 +45,7 @@ RATS.prototype.append = function (obj, time, cb) {
 
   if (this.currentSegmentSize >= this.maxSegmentSize) {
     this.currentSegmentOffset = this.currentOffset
+    this.currentSegmentSize = 0
   }
 
   appendLog(data, time)
@@ -61,7 +62,8 @@ RATS.prototype.append = function (obj, time, cb) {
     var index = {offset: self.currentOffset, position: self.currentSegmentSize, size: data.length}
     fs.appendFile(self.currentIndex(), messages.Index.encode(index), function (err) {
       if (err) return cb(err)
-      this.currentSegmentSize += data.length
+      self.currentSegmentSize += data.length
+      self.currentOffset++
 
       cb()
     })
