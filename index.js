@@ -5,7 +5,7 @@ const path = require('path')
 const messages = pb(fs.readFileSync(path.join(__dirname, 'messages.proto')))
 
 const INDEX_ITEM_SIZE = 15
-const DEFAULT_MAX_SEGMENT_SIZE = 5 * 1024 // max segment size in bytes
+const DEFAULT_MAX_SEGMENT_SIZE = 5 * 1024 * 1024 // max segment size in bytes
 
 module.exports = RATS
 
