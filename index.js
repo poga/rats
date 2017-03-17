@@ -32,7 +32,7 @@ function RATS (path, opts) {
   } else {
     files.forEach(function (file) {
       if (file.endsWith('.index')) {
-        var offset = file.match(/^(\d+)\.index/)[1]
+        var offset = +file.match(/^(\d+)\.index/)[1]
         if (offset > maxOffset) maxOffset = offset
       }
     })
