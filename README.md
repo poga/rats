@@ -15,6 +15,30 @@ rats.append({foo: 'bar'}, function (err) {
 })
 ```
 
+## API
+
+#### `var rats = new RATS(path, opts)`
+
+Create a new RATS at `path`. Options `opts` include:
+
+* maxSegmentSize: maximum size of a segment. default:5MB
+
+#### `rats.currentOffset`
+
+Returns the current offset.
+
+#### `rats.append(object, [time], cb(err))`
+
+Append an `object` to the RATS. you can specify the timestamp of this append with `time` (unix time in seconds).
+
+#### `rats.currentIndex()`
+
+The index file currently in use.
+
+#### `rats.currentLog()`
+
+The log file currently in use.
+
 ## License
 
 The MIT License
