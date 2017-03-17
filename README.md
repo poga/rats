@@ -12,6 +12,8 @@ var RATS = require('rats')
 var rats = new RATS('./rats')
 rats.append({foo: 'bar'}, function (err) {})
 rats.currentOffset // === 1
+rats.get(0, function (err, data) {})
+rats.range(0, 100, function (err, list) {})
 ```
 
 ## API
@@ -37,6 +39,15 @@ The index file currently in use.
 #### `rats.currentLog()`
 
 The log file currently in use.
+
+#### `rats.get(offset, cb(err, data))`
+
+Get the data at `offset`.
+
+#### `rats.range(start, end, cb(err,list))`
+
+Get the data(s) in the range.
+
 
 ## License
 
