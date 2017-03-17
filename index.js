@@ -12,6 +12,9 @@ const INDEX_ITEM_SIZE = 15
 const DEFAULT_MAX_SEGMENT_SIZE = 5 * 1024 * 1024 // max segment size in bytes
 
 module.exports = RATS
+module.exports.VERSION = VERSION
+module.exports.HEADER_SIZE = HEADER_SIZE
+module.exports.INDEX_ITEM_SIZE = INDEX_ITEM_SIZE
 
 function RATS (path, opts) {
   opts = Object.assign({}, {maxSegmentSize: DEFAULT_MAX_SEGMENT_SIZE}, opts)
