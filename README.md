@@ -10,9 +10,8 @@ JavaScript implementation for [RATS](https://github.com/random-access-timeseries
 var RATS = require('rats')
 
 var rats = new RATS('./rats')
-rats.append({foo: 'bar'}, function (err) {
-
-})
+rats.append({foo: 'bar'}, function (err) {})
+rats.currentOffset // === 1
 ```
 
 ## API

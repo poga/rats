@@ -19,6 +19,7 @@ tape('append', function (t) {
     var now = Math.round(Date.now() / 1000)
     rats.append({foo: 'bar'}, now, function (err) {
       t.error(err)
+      t.equal(rats.currentOffset, 1, 'current offset')
 
       var indexFile = path.join(dir, '0.index')
       var logFile = path.join(dir, '0.log')
@@ -62,9 +63,11 @@ tape('segment', function (t) {
     var rats = new RATS(dir, {maxSegmentSize: 0})
     rats.append({foo: 'bar'}, function (err) {
       t.error(err)
+      t.equal(rats.currentOffset, 1, 'current offset')
 
       rats.append({foo: 'baz'}, function (err) {
         t.error(err)
+        t.equal(rats.currentOffset, 2, 'current offset')
 
         var indexFile = path.join(dir, '1.index')
         var logFile = path.join(dir, '1.log')
@@ -107,7 +110,7 @@ tape('existing data', function (t) {
   })
 
   function test () {
-    var rats = new RATS(dir, {maxSegmentSize: 20})
+    var rats = new RATS(dir)
     t.same(rats.currentOffset, 3)
     t.same(rats.currentSegmentSize, 14)
     t.same(rats.currentSegmentOffset, 2)
