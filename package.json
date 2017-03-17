@@ -18,6 +18,7 @@
     "tape": "^4.6.3"
   },
   "dependencies": {
-    "protocol-buffers": "^3.2.1"
+    "protocol-buffers": "^3.2.1",
+    "uint64be": "^2.0.1"
   }
 }
