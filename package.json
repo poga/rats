@@ -4,7 +4,7 @@
   "description": "marshal and unmarshalling rats timeseries",
   "main": "index.js",
   "scripts": {
-    "test": "rm -rf ./temp && tape test/*"
+    "test": "rm -rf ./temp && tape test/*.js"
   },
   "keywords": [
     "timeseries",

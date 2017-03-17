@@ -98,3 +98,19 @@ tape('segment', function (t) {
     })
   }
 })
+
+tape('existing data', function (t) {
+  var dir = path.join('.', 'test', 'fixtures', 'data')
+  mkdirp(dir, function (err) {
+    t.error(err)
+    test()
+  })
+
+  function test () {
+    var rats = new RATS(dir, {maxSegmentSize: 20})
+    t.same(rats.currentOffset, 3)
+    t.same(rats.currentSegmentSize, 14)
+    t.same(rats.currentSegmentOffset, 2)
+    t.end()
+  }
+})
