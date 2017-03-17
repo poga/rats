@@ -28,7 +28,7 @@ tape('append', function (t) {
       var index = fs.statSync(indexFile)
       t.equal(index.size, 29, 'index file size')
       var log = fs.statSync(logFile)
-      t.equal(log.size, 14, 'log file size')
+      t.equal(log.size, 37, 'log file size')
 
       // check decode index header
       var headerBuf = new Buffer(14)
@@ -40,11 +40,12 @@ tape('append', function (t) {
       // check decode index item
       var indexBuf = new Buffer(15)
       fs.readSync(fs.openSync(indexFile, 'r'), indexBuf, 0, 15, 14)
-      t.same(messages.Index.decode(indexBuf), { offset: 0, position: 0, size: 14 }, 'decode index item')
+      t.same(messages.Index.decode(indexBuf), { offset: 0, position: 0, size: 37 }, 'decode index item')
 
       // check decode log
       var data = JSON.parse(fs.readFileSync(logFile))
-      t.same(data, {foo: 'bar'}, 'decode log')
+      // timestamp should be injected
+      t.same(data, {foo: 'bar', timestamp: now}, 'decode log')
       rimraf(dir, function () {
         t.end()
       })
@@ -76,7 +77,7 @@ tape('segment', function (t) {
         var index = fs.statSync(indexFile)
         t.equal(index.size, 29, 'index size')
         var log = fs.statSync(logFile)
-        t.equal(log.size, 14, 'log size')
+        t.equal(log.size, 37, 'log size')
 
         // check decode index header
         var headerBuf = new Buffer(14)
@@ -88,14 +89,108 @@ tape('segment', function (t) {
         // check decode index item
         var indexBuf = new Buffer(15)
         fs.readSync(fs.openSync(indexFile, 'r'), indexBuf, 0, 15, 14)
-        t.same(messages.Index.decode(indexBuf), { offset: 1, position: 0, size: 14 }, 'decode index item')
+        t.same(messages.Index.decode(indexBuf), { offset: 1, position: 0, size: 37 }, 'decode index item')
 
         // check decode log
         var data = JSON.parse(fs.readFileSync(logFile))
-        t.same(data, {foo: 'baz'}, 'decode log')
+        t.same(data.foo, 'baz', 'decode log')
+        t.ok(data.timestamp, 'injected timestamp')
 
         rimraf(dir, function () {
           t.end()
+        })
+      })
+    })
+  }
+})
+
+tape('get', function (t) {
+  var dir = path.join('.', 'temp')
+  mkdirp(dir, function (err) {
+    t.error(err)
+    test()
+  })
+
+  function test () {
+    var rats = new RATS(dir)
+    var t1 = Math.round(Date.now() / 1000)
+    rats.append({foo: 'bar'}, t1, function (err) {
+      t.error(err)
+      rats.append({foo: 'baz'}, t1 + 1, function (err) {
+        t.error(err)
+
+        rats.get(0, function (err, data) {
+          t.error(err)
+          t.same(data, { foo: 'bar', timestamp: t1 })
+          rats.get(1, function (err, data) {
+            t.error(err)
+            t.same(data, { foo: 'baz', timestamp: t1 + 1 })
+            done()
+          })
+        })
+      })
+    })
+  }
+
+  function done () {
+    rimraf(dir, function () {
+      t.end()
+    })
+  }
+})
+
+tape('get invalid offset', function (t) {
+  var dir = path.join('.', 'temp')
+  mkdirp(dir, function (err) {
+    t.error(err)
+    test()
+  })
+
+  function test () {
+    var rats = new RATS(dir)
+    var t1 = Math.round(Date.now() / 1000)
+    rats.append({foo: 'bar'}, t1, function (err) {
+      t.error(err)
+      rats.get(1, function (err, data) {
+        t.ok(err)
+        rats.get(-1, function (err, data) {
+          t.ok(err)
+          done()
+        })
+      })
+    })
+  }
+
+  function done () {
+    rimraf(dir, function () {
+      t.end()
+    })
+  }
+})
+
+tape('inject timestamp', function (t) {
+  var dir = path.join('.', 'temp')
+  mkdirp(dir, function (err) {
+    t.error(err)
+    test()
+  })
+
+  function test () {
+    var rats = new RATS(dir)
+    rats.append({foo: 'bar', timestamp: 1234}, function (err) {
+      t.error(err)
+      t.equal(rats.currentOffset, 1, 'current offset')
+
+      rats.append({foo: 'baz'}, function (err) {
+        t.error(err)
+        t.equal(rats.currentOffset, 2, 'current offset')
+
+        rats.get(0, function (err, data) {
+          t.error(err)
+          t.same(data, { foo: 'bar', timestamp: 1234 })
+          rimraf(dir, function () {
+            t.end()
+          })
         })
       })
     })
