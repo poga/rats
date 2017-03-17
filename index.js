@@ -44,7 +44,7 @@ RATS.prototype.append = function (obj, time, cb) {
     cb = time // time is optional
     time = Math.round(Date.now() / 1000)
   }
-  var data = new Buffer(JSON.stringify(Object.assign({}, obj, {time: time})) + '\n')
+  var data = new Buffer(JSON.stringify(obj) + '\n')
   var self = this
 
   if (this.currentOffset === 0) {

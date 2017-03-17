@@ -27,7 +27,7 @@ tape('append', function (t) {
       var index = fs.statSync(indexFile)
       t.equal(index.size, 29, 'index file size')
       var log = fs.statSync(logFile)
-      t.equal(log.size, 32, 'log file size')
+      t.equal(log.size, 14, 'log file size')
 
       // check decode index header
       var headerBuf = new Buffer(14)
@@ -39,12 +39,11 @@ tape('append', function (t) {
       // check decode index item
       var indexBuf = new Buffer(15)
       fs.readSync(fs.openSync(indexFile, 'r'), indexBuf, 0, 15, 14)
-      t.same(messages.Index.decode(indexBuf), { offset: 0, position: 0, size: 32 }, 'decode index item')
+      t.same(messages.Index.decode(indexBuf), { offset: 0, position: 0, size: 14 }, 'decode index item')
 
       // check decode log
       var data = JSON.parse(fs.readFileSync(logFile))
-      t.same(data.foo, 'bar', 'decode log')
-      t.ok(data.time, 'decode log time')
+      t.same(data, {foo: 'bar'}, 'decode log')
       rimraf(dir, function () {
         t.end()
       })
@@ -74,7 +73,7 @@ tape('segment', function (t) {
         var index = fs.statSync(indexFile)
         t.equal(index.size, 29, 'index size')
         var log = fs.statSync(logFile)
-        t.equal(log.size, 32, 'log size')
+        t.equal(log.size, 14, 'log size')
 
         // check decode index header
         var headerBuf = new Buffer(14)
@@ -86,12 +85,11 @@ tape('segment', function (t) {
         // check decode index item
         var indexBuf = new Buffer(15)
         fs.readSync(fs.openSync(indexFile, 'r'), indexBuf, 0, 15, 14)
-        t.same(messages.Index.decode(indexBuf), { offset: 1, position: 0, size: 32 }, 'decode index item')
+        t.same(messages.Index.decode(indexBuf), { offset: 1, position: 0, size: 14 }, 'decode index item')
 
         // check decode log
         var data = JSON.parse(fs.readFileSync(logFile))
-        t.same(data.foo, 'baz', 'decode log')
-        t.ok(data.time, 'decode log time')
+        t.same(data, {foo: 'baz'}, 'decode log')
 
         rimraf(dir, function () {
           t.end()
