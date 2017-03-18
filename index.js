@@ -5,7 +5,6 @@ const uint64be = require('uint64be')
 const async = require('async')
 const hl = require('highland')
 const ndjson = require('ndjson')
-const through2 = require('through2')
 
 const messages = pb(fs.readFileSync(path.join(__dirname, 'messages.proto')))
 
