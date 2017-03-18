@@ -110,3 +110,50 @@ tape('range', function (t) {
     })
   }
 })
+
+tape('range without end time', function (t) {
+  var dir = path.join('.', 'temp')
+  mkdirp(dir, function (err) {
+    t.error(err)
+    prepare()
+  })
+  var rats
+  var t1 = Math.round(Date.now() / 1000)
+
+  function prepare () {
+    rats = new RATS(dir, t1, {maxSegmentSize: 20})
+    rats.append({foo: 'bar'}, function (err) {
+      t.error(err)
+      t.equal(rats.currentOffset, 1, 'current offset')
+
+      rats.append({foo: 'baz'}, t1 + 1, function (err) {
+        t.error(err)
+        t.equal(rats.currentOffset, 2, 'current offset')
+
+        rats.append({foo: 'bzz'}, t1 + 2, function (err) {
+          t.error(err)
+          t.equal(rats.currentOffset, 3, 'current offset')
+
+          test()
+        })
+      })
+    })
+  }
+
+  function test () {
+    rats.range(t1, function (err, stream) {
+      t.error(err)
+      collect(stream, function (err, data) {
+        t.error(err)
+        t.same(data, [
+          {foo: 'bar', timestamp: t1},
+          {foo: 'baz', timestamp: t1 + 1},
+          {foo: 'bzz', timestamp: t1 + 2}
+        ])
+        rimraf(dir, function () {
+          t.end()
+        })
+      })
+    })
+  }
+})

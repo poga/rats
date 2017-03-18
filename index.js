@@ -137,6 +137,10 @@ RATS.prototype.logFile = function (segmentOffset) {
 }
 
 RATS.prototype.range = function (start, end, cb) {
+  if (!cb) {
+    cb = end
+    end = undefined
+  }
   var self = this
   fs.readdir(this.path, function (err, files) {
     if (err) return cb(err)
@@ -154,7 +158,7 @@ RATS.prototype.range = function (start, end, cb) {
           segmentStart = i
         }
 
-        if (ts < segmentEnd) {
+        if (end && ts < end) {
           segmentEnd = i
         }
       }
@@ -185,7 +189,7 @@ RATS.prototype.range = function (start, end, cb) {
     return streams.pipe(
       hl.pipeline(
         ndjson.parse(),
-        hl.filter(function (data) { return data.timestamp >= start && data.timestamp < end })
+        hl.filter(function (data) { return data.timestamp >= start && (!end || data.timestamp < end) })
       ))
   }
 }

@@ -44,9 +44,10 @@ The log file currently in use.
 
 Get the data at `offset`.
 
-#### `rats.range(startTime, endTime, cb(err,list))`
+#### `rats.range(startTime, [endTime], cb(err,list))`
 
 Get the data(s) in the range.
+
 
 
 ## License
