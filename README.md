@@ -48,6 +48,8 @@ Get the data at `offset`.
 
 Get the data(s) in the range.
 
+`endTime` by default will be the timestamp of the last object in the RATS.
+
 
 
 ## License
