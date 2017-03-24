@@ -39,7 +39,7 @@ tape('range', function (t) {
       t.error(err)
       collect(stream, function (err, data) {
         t.error(err)
-        t.same(data, [{foo: 'bar', timestamp: t1}])
+        t.same(data, [{foo: 'bar', timestamp: t1, offset: 0}])
         test2()
       })
     })
@@ -50,7 +50,7 @@ tape('range', function (t) {
       t.error(err)
       collect(stream, function (err, data) {
         t.error(err)
-        t.same(data, [{foo: 'bar', timestamp: t1}, {foo: 'baz', timestamp: t1 + 1}])
+        t.same(data, [{foo: 'bar', timestamp: t1, offset: 0 }, {foo: 'baz', timestamp: t1 + 1, offset: 1}])
         test3()
       })
     })
@@ -62,9 +62,9 @@ tape('range', function (t) {
       collect(stream, function (err, data) {
         t.error(err)
         t.same(data, [
-           {foo: 'bar', timestamp: t1},
-           {foo: 'baz', timestamp: t1 + 1},
-           {foo: 'bzz', timestamp: t1 + 2}
+           {foo: 'bar', offset: 0, timestamp: t1},
+           {foo: 'baz', offset: 1, timestamp: t1 + 1},
+           {foo: 'bzz', offset: 2, timestamp: t1 + 2}
         ])
         test4()
       })
@@ -77,9 +77,9 @@ tape('range', function (t) {
       collect(stream, function (err, data) {
         t.error(err)
         t.same(data, [
-           {foo: 'bar', timestamp: t1},
-           {foo: 'baz', timestamp: t1 + 1},
-           {foo: 'bzz', timestamp: t1 + 2}
+           {foo: 'bar', offset: 0, timestamp: t1},
+           {foo: 'baz', offset: 1, timestamp: t1 + 1},
+           {foo: 'bzz', offset: 2, timestamp: t1 + 2}
         ])
         test5()
       })
@@ -146,9 +146,9 @@ tape('range without end time', function (t) {
       collect(stream, function (err, data) {
         t.error(err)
         t.same(data, [
-          {foo: 'bar', timestamp: t1},
-          {foo: 'baz', timestamp: t1 + 1},
-          {foo: 'bzz', timestamp: t1 + 2}
+          {foo: 'bar', offset: 0, timestamp: t1},
+          {foo: 'baz', offset: 1, timestamp: t1 + 1},
+          {foo: 'bzz', offset: 2, timestamp: t1 + 2}
         ])
         rimraf(dir, function () {
           t.end()

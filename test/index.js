@@ -28,7 +28,7 @@ tape('append', function (t) {
       var index = fs.statSync(indexFile)
       t.equal(index.size, 29, 'index file size')
       var log = fs.statSync(logFile)
-      t.equal(log.size, 37, 'log file size')
+      t.equal(log.size, 48, 'log file size')
 
       // check decode index header
       var headerBuf = new Buffer(14)
@@ -40,12 +40,12 @@ tape('append', function (t) {
       // check decode index item
       var indexBuf = new Buffer(15)
       fs.readSync(fs.openSync(indexFile, 'r'), indexBuf, 0, 15, 14)
-      t.same(messages.Index.decode(indexBuf), { offset: 0, position: 0, size: 37 }, 'decode index item')
+      t.same(messages.Index.decode(indexBuf), { offset: 0, position: 0, size: 48 }, 'decode index item')
 
       // check decode log
       var data = JSON.parse(fs.readFileSync(logFile))
       // timestamp should be injected
-      t.same(data, {foo: 'bar', timestamp: now}, 'decode log')
+      t.same(data, {foo: 'bar', timestamp: now, offset: 0}, 'decode log')
       rimraf(dir, function () {
         t.end()
       })
@@ -91,7 +91,7 @@ tape('segment', function (t) {
         var index = fs.statSync(indexFile)
         t.equal(index.size, 29, 'index size')
         var log = fs.statSync(logFile)
-        t.equal(log.size, 37, 'log size')
+        t.equal(log.size, 48, 'log size')
 
         // check decode index header
         var headerBuf = new Buffer(14)
@@ -103,7 +103,7 @@ tape('segment', function (t) {
         // check decode index item
         var indexBuf = new Buffer(15)
         fs.readSync(fs.openSync(indexFile, 'r'), indexBuf, 0, 15, 14)
-        t.same(messages.Index.decode(indexBuf), { offset: 1, position: 0, size: 37 }, 'decode index item')
+        t.same(messages.Index.decode(indexBuf), { offset: 1, position: 0, size: 48 }, 'decode index item')
 
         // check decode log
         var data = JSON.parse(fs.readFileSync(logFile))
@@ -135,10 +135,10 @@ tape('get', function (t) {
 
         rats.get(0, function (err, data) {
           t.error(err)
-          t.same(data, { foo: 'bar', timestamp: t1 })
+          t.same(data, { foo: 'bar', timestamp: t1, offset: 0 })
           rats.get(1, function (err, data) {
             t.error(err)
-            t.same(data, { foo: 'baz', timestamp: t1 + 1 })
+            t.same(data, { foo: 'baz', timestamp: t1 + 1, offset: 1 })
             done()
           })
         })
@@ -201,7 +201,7 @@ tape('inject timestamp', function (t) {
 
         rats.get(0, function (err, data) {
           t.error(err)
-          t.same(data, { foo: 'bar', timestamp: 1234 })
+          t.same(data, { foo: 'bar', timestamp: 1234, offset: 0 })
           rimraf(dir, function () {
             t.end()
           })
