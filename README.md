@@ -28,7 +28,7 @@ Create a new RATS at `path`. Options `opts` include:
 
 Returns the current offset.
 
-#### `rats.append(object, [time], cb(err))`
+#### `rats.append(object, [time], [cb(err)])`
 
 Append an `object` to the RATS. you can specify the timestamp of this append with `time` (unix time in seconds).
 

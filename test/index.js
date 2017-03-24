@@ -53,6 +53,20 @@ tape('append', function (t) {
   }
 })
 
+tape('append without callback', function (t) {
+  var dir = path.join('.', 'temp')
+  mkdirp(dir, function (err) {
+    t.error(err)
+    test()
+  })
+
+  function test () {
+    var rats = new RATS(dir)
+    rats.append({foo: 'bar'})
+    t.end()
+  }
+})
+
 tape('segment', function (t) {
   var dir = path.join('.', 'temp')
   mkdirp(dir, function (err) {

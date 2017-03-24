@@ -46,11 +46,12 @@ function RATS (path, opts) {
 }
 
 RATS.prototype.append = function (obj, time, cb) {
-  if (!cb) {
+  if (!cb && typeof time === 'function') {
     cb = time // time is optional
     time = Math.round(Date.now() / 1000)
   }
   var data = new Buffer(JSON.stringify(Object.assign({}, {timestamp: time}, obj)) + '\n')
+  if (!cb) cb = noop
   var self = this
 
   if (this.currentOffset === 0) {
@@ -240,3 +241,5 @@ function getLogByIndex (logFile, index, cb) {
     cb(null, log)
   })
 }
+
+function noop () {}
